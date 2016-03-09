@@ -1,27 +1,26 @@
 package com.android.dev.sineth.ytsmoviefactory;
 
-import java.util.PriorityQueue;
 
 /**
  * Created by Sineth on 2/24/2016.
  */
 public class Cast {
-    private String name;
-    private String character_name;
+    private String actorName;
+    private String characterName;
 
-    public String getCharacter_name() {
-        return character_name;
+    public String getCharacterName() {
+        return characterName;
     }
 
-    public void setCharacter_name(String character_name) {
-        this.character_name = character_name;
+    public void setCharacterName(String character_name) {
+        this.characterName = character_name;
     }
 
     public String getName() {
-        return name;
+        return actorName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setName(String actorName) {
+        this.actorName = actorName;
     }
 }

@@ -2,17 +2,23 @@ package com.android.dev.sineth.ytsmoviefactory;
 
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.android.dev.sineth.ytsmoviefactory.Database.DBHelper;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
@@ -26,33 +32,48 @@ public class ViewMovie extends AppCompatActivity implements View.OnClickListener
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_movie);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        collapsingToolbarLayout= (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
-        main_textView= (TextView) findViewById(R.id.main_textView);
-
+/**
+ * layout items initialization by  binding with the variables
+ */
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         final ImageView coverImage = (ImageView) findViewById(R.id.backdrop);
+        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        main_textView= (TextView) findViewById(R.id.movieDescriptionTextView);
+        collapsingToolbarLayout= (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
 
-        setSupportActionBar(toolbar);
+
         movie = (MovieBriefDetails) getIntent().getExtras().getSerializable("Movie");
+        ImageLoader imageLoader = VolleySingleton.getInstance().getImageLoader();
+        setSupportActionBar(toolbar);
+
 
         if (movie != null) {
             collapsingToolbarLayout.setTitle(movie.getMovie_title());
+            main_textView.setText(movie.getSummary());
+
+        }else{
+            new MaterialDialog.Builder(ViewMovie.this)
+                    .title("Error while loading content")
+                    .content("We are having trouble loading movie details.")
+                    .positiveText(R.string.back)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            dialog.dismiss();
+                            onBackPressed();
+                        }
+                    })
+                    .negativeText(R.string.dismiss)
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .show();
         }
-        ImageLoader imageLoader = VolleySingleton.getInstance().getImageLoader();
-        imageLoader.get(movie.getMovie_cover_url_large(), new ImageLoader.ImageListener() {
-            @Override
-            public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                coverImage.setImageBitmap(response.getBitmap());
-            }
 
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        });
-
-        main_textView.setText(movie.getSummary());
+        getMovieCoverLargePoster(coverImage, imageLoader,this.findViewById(android.R.id.content));
 
         for (Torrent t:movie.getTorrentList()){
             switch (t.getQuality()){
@@ -66,7 +87,6 @@ public class ViewMovie extends AppCompatActivity implements View.OnClickListener
                     break;
                 case "1080p":
                     String size_1080 ="Size "+t.getSize();
-
                     ((TextView) findViewById(R.id.size_1080p)).setText(size_1080);
                     String peers_1080="Peers "+t.getPeers();
                     ((TextView)findViewById(R.id.peers_1080p)).setText(peers_1080);
@@ -93,10 +113,8 @@ public class ViewMovie extends AppCompatActivity implements View.OnClickListener
 
 
 
-        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         Log.d("fav", String.valueOf(movie.getFavourite()));
         if (movie.getFavourite()){
-
             fab.setImageResource(R.mipmap.ic_fav_added);
         }
         fab.setOnClickListener(new View.OnClickListener() {
@@ -129,9 +147,46 @@ public class ViewMovie extends AppCompatActivity implements View.OnClickListener
 
     }
 
+    /**
+     * Downloads movie cover poster asynchronously if an error occurs user is
+     * notified.
+     * @param coverImage
+     * @param imageLoader
+     */
+    private void getMovieCoverLargePoster(final ImageView coverImage, ImageLoader imageLoader,final View view) {
+        imageLoader.get(movie.getMovie_cover_url_large(), new ImageLoader.ImageListener() {
+            @Override
+            public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+                Bitmap bm = response.getBitmap();
+                coverImage.setImageBitmap(bm);
+            }
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Snackbar.make(view,"We are having issues downloading the movie poster",Snackbar.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     @Override
     public void onClick(View v) {
         sqLiteDatabase.delete(DBHelper.MOVIE,Keys.ID,new String[movie.getId()]);
 
+    }
+    public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+        // CREATE A MATRIX FOR THE MANIPULATION
+        Matrix matrix = new Matrix();
+        // RESIZE THE BIT MAP
+        matrix.postScale(scaleWidth, scaleHeight);
+
+        // "RECREATE" THE NEW BITMAP
+        Bitmap resizedBitmap = Bitmap.createBitmap(
+                bm, 0, 0, width, height, matrix, false);
+        bm.recycle();
+        return resizedBitmap;
     }
 }
