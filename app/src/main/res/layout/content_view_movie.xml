@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".ViewMovie"
+    tools:context=".View.ViewMovie"
     tools:showIn="@layout/activity_view_movie">
 
     <LinearLayout
@@ -380,7 +380,7 @@
                         android:layout_height="wrap_content"
                         android:paddingLeft="8dp"
                         android:paddingTop="4dp"
-                        android:id="@+id/rt_rating"
+                        android:id="@+id/run_time"
                         android:text="@string/rt_rating" />
 
                     <TextView

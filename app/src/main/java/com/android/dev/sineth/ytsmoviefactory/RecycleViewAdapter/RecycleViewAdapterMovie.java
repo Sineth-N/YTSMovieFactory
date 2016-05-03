@@ -12,10 +12,10 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.dev.sineth.ytsmoviefactory.MovieBriefDetails;
+import com.android.dev.sineth.ytsmoviefactory.Models.Movie;
 import com.android.dev.sineth.ytsmoviefactory.R;
-import com.android.dev.sineth.ytsmoviefactory.ViewMovie;
-import com.android.dev.sineth.ytsmoviefactory.VolleySingleton;
+import com.android.dev.sineth.ytsmoviefactory.View.ViewMovie;
+import com.android.dev.sineth.ytsmoviefactory.Network.VolleySingleton;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 
@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class  RecycleViewAdapterMovie extends RecyclerView.Adapter<RecycleViewAdapterMovie.RecycleViewHolders> {
 
-    private List<MovieBriefDetails> briefDetailsList;
+    private List<Movie> movieList;
     private Context context;
     private VolleySingleton volleySingleton;
     private ImageLoader imageLoader;
@@ -38,8 +38,8 @@ public class  RecycleViewAdapterMovie extends RecyclerView.Adapter<RecycleViewAd
         imageLoader = volleySingleton.getImageLoader();
     }
 
-    public void setMovieList(List<MovieBriefDetails> movieList){
-        this.briefDetailsList=movieList;
+    public void setMovieList(List<Movie> movieList){
+        this.movieList=movieList;
         notifyItemRangeChanged(0,movieList.size());
     }
     @Override
@@ -51,23 +51,23 @@ public class  RecycleViewAdapterMovie extends RecyclerView.Adapter<RecycleViewAd
 
     @Override
     public void onBindViewHolder(final RecycleViewHolders holder, int position) {
-        final MovieBriefDetails currentMovie = briefDetailsList.get(position);
-        holder.movie_genre.setText(currentMovie.getMovie_genre());
-        holder.movie_name.setText(currentMovie.getMovie_title());
-        holder.released_Year.setText(currentMovie.getMovie_released_year());
-        holder.movie_rating_bar.setRating(currentMovie.getMovie_rating());
-        String movie_cover_url = currentMovie.getMovie_cover_url_small();
-        if (movie_cover_url!=null){
-            imageLoader.get(movie_cover_url, new ImageLoader.ImageListener() {
+        final Movie currentMovie = movieList.get(position);
+        holder.movieGenre.setText(currentMovie.getMovie_genre());
+        holder.movieName.setText(currentMovie.getMovie_title());
+        holder.releasedYear.setText(currentMovie.getMovie_released_year());
+        holder.movieRating.setRating(currentMovie.getMovie_rating());
+        String movieCoverUrlSmall = currentMovie.getMovie_cover_url_small();
+        if (movieCoverUrlSmall!=null){
+            imageLoader.get(movieCoverUrlSmall, new ImageLoader.ImageListener() {
                 @Override
                 public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
                     Bitmap cover = response.getBitmap();
-                    holder.movie_poster.setImageBitmap(cover);
+                    holder.moviePoster.setImageBitmap(cover);
                 }
 
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    holder.movie_poster.setImageResource(R.drawable.ic_poster_not_available);
+                    holder.moviePoster.setImageResource(R.drawable.ic_poster_not_available);
                 }
             });
         }
@@ -75,27 +75,27 @@ public class  RecycleViewAdapterMovie extends RecyclerView.Adapter<RecycleViewAd
 
     @Override
     public int getItemCount() {
-        if (briefDetailsList==null){
+        if (movieList==null){
             return 0;
         }
-        return briefDetailsList.size();
+        return movieList.size();
     }
 
     class RecycleViewHolders extends RecyclerView.ViewHolder implements View.OnClickListener {
-        ImageView movie_poster;
-        TextView movie_name;
-        TextView movie_genre;
-        TextView released_Year;
-        RatingBar movie_rating_bar;
+        ImageView moviePoster;
+        TextView movieName;
+        TextView movieGenre;
+        TextView releasedYear;
+        RatingBar movieRating;
 
         public RecycleViewHolders(View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
-            movie_poster = (ImageView) itemView.findViewById(R.id.movie_poster);
-            movie_name = (TextView) itemView.findViewById(R.id.movie_name);
-            movie_genre = (TextView) itemView.findViewById(R.id.movie_genre);
-            released_Year = (TextView) itemView.findViewById(R.id.movie_released_year);
-            movie_rating_bar = (RatingBar) itemView.findViewById(R.id.movie_rating_bar);
+            moviePoster = (ImageView) itemView.findViewById(R.id.movie_poster);
+            movieName = (TextView) itemView.findViewById(R.id.movie_name);
+            movieGenre = (TextView) itemView.findViewById(R.id.movie_genre);
+            releasedYear = (TextView) itemView.findViewById(R.id.movie_released_year);
+            movieRating = (RatingBar) itemView.findViewById(R.id.movie_rating_bar);
         }
 
         @Override
@@ -103,7 +103,7 @@ public class  RecycleViewAdapterMovie extends RecyclerView.Adapter<RecycleViewAd
             Toast.makeText(v.getContext(), "selected "+getLayoutPosition(), Toast.LENGTH_SHORT).show();
             final Intent intent;
             intent=new Intent(context, ViewMovie.class);
-            intent.putExtra("Movie",briefDetailsList.get(getLayoutPosition()));
+            intent.putExtra("Movie",movieList.get(getLayoutPosition()));
             context.startActivity(intent);
         }
     }
