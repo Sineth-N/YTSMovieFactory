@@ -54,6 +54,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.android.dev.sineth.ytsmoviefactory.View.MainActivity" />
         </activity>
+        <activity
+            android:name=".View.Login"
+            android:label="@string/title_activity_login"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

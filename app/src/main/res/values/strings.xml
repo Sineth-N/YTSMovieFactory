@@ -130,4 +130,5 @@
     <string name="Genres">"Genres: "</string>
     <string name="title_activity_favourite">FavouriteActivity</string>
     <string name="title_activity_main2">Favourites</string>
+    <string name="title_activity_login">Login</string>
 </resources>

@@ -49,7 +49,9 @@ public class DBController {
         Cursor cursor = sqLiteDatabase.query(DBHelper.FAVOURITE, new String[]{Keys.ISFAV}, Keys.ID + "=?", new String[]{String.valueOf(movieId)}, null, null, null);
 
         if (cursor.moveToNext()) {
-            return cursor.getString(cursor.getColumnIndex(Keys.ISFAV)).equals("1");
+            boolean b = cursor.getString(cursor.getColumnIndex(Keys.ISFAV)).equals("1");
+            cursor.close();
+            return b;
         }
         if (cursor != null && !cursor.isClosed()) {
             cursor.close();
