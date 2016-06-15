@@ -128,4 +128,6 @@
     <string name="errorTitle">Error while loading content</string>
     <string name="errorContent">We are having trouble loading movie details.</string>
     <string name="Genres">"Genres: "</string>
+    <string name="title_activity_favourite">FavouriteActivity</string>
+    <string name="title_activity_main2">Favourites</string>
 </resources>

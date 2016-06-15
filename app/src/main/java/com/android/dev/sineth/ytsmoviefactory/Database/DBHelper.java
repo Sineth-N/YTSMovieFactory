@@ -3,6 +3,7 @@ package com.android.dev.sineth.ytsmoviefactory.Database;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.android.dev.sineth.ytsmoviefactory.Resources.Keys;
 
@@ -14,6 +15,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String MOVIE = "Movie";
     public static final String DATABASE_NAME = "MovieDetails.db";
     public static final int DATABASE_VERSION = 1;
+    public static final String FAVOURITE = "favourite";
     /**
      * This string is used to create new table
      */
@@ -23,6 +25,9 @@ public class DBHelper extends SQLiteOpenHelper {
             Keys.LARGE_COVER_IMAGE + " VARCHAR(2083), " + Keys.MEDIUM_COVER_IMAGE + " VARCHAR(2083), " + Keys.SMALL_COVER_IMAGE + " VARCHAR(2083), " +
             Keys.YOUTUBE_TRAILER + " VARCHAR(50)" +
             ");";
+
+    private static final String CREATE_TABLE_FAVOURITE = "CREATE TABLE " + FAVOURITE + " ( " + Keys.ID + " VARCHAR(30) PRIMARY KEY, " +
+            Keys.ISFAV + " INTEGER(2) " + " ); ";
     private static final String DROP_TABLE_TASKS = "DROP TABLE IF EXISTS" + MOVIE;
     private Context context;
 
@@ -34,7 +39,10 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        Log.e("TAG", "creating the database");
         db.execSQL(CREATE_TABLE_CARDS);
+        db.execSQL(CREATE_TABLE_FAVOURITE);
+
     }
 
     @Override
@@ -45,6 +53,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     /**
      * this function returns a writable instance of the database
+     *
      * @return SQLiteDatabase
      */
     @Override

@@ -31,4 +31,5 @@ public class Keys {
     public static final String PEERS="peers";
     public static final String TORRENTS = "torrents";
     public static final String URL = "url";
+    public static final String ISFAV = "isFav";
 }

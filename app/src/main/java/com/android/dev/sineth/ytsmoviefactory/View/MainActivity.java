@@ -1,7 +1,6 @@
 package com.android.dev.sineth.ytsmoviefactory.View;
 
 import android.content.Intent;
-import android.database.sqlite.SQLiteQueryBuilder;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -21,6 +20,8 @@ import android.view.View;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.android.dev.sineth.ytsmoviefactory.Kernel.Core;
+import com.android.dev.sineth.ytsmoviefactory.Kernel.JSONParser;
 import com.android.dev.sineth.ytsmoviefactory.Models.Movie;
 import com.android.dev.sineth.ytsmoviefactory.Network.VolleySingleton;
 import com.android.dev.sineth.ytsmoviefactory.R;
@@ -41,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity
@@ -49,7 +51,7 @@ public class MainActivity extends AppCompatActivity
     private static int page = 1;
     private RecyclerView recyclerView;
     private RequestQueue requestQueue;
-    private ArrayList<Movie> list_movies = new ArrayList<>();
+    private List<Movie> list_movies = new ArrayList<>();
     private ArrayList<Movie> test = new ArrayList<>();
     private RecycleViewAdapterMovie recycleViewAdapterMovie;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -60,15 +62,18 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //setting up main toolbars and the actionbars
+
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        //network things
         VolleySingleton volleySingleton = VolleySingleton.getInstance();
         requestQueue = volleySingleton.getRequestQueue();
 
         recyclerView = (RecyclerView) findViewById(R.id.movieList);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(MainActivity.this, 2);
+//        StaggeredGridLayoutManager gridLayoutManager = new StaggeredGridLayoutManager(3,StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(gridLayoutManager);
         recycleViewAdapterMovie = new RecycleViewAdapterMovie(MainActivity.this);
         recyclerView.setAdapter(recycleViewAdapterMovie);
@@ -124,7 +129,8 @@ public class MainActivity extends AppCompatActivity
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(url, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
-                list_movies = parseJSONResponse(response);
+                JSONParser.parseJSONResponse(response,MainActivity.this);
+                list_movies= Core.getMovies();
                 Collections.sort(list_movies, new Comparator<Movie>() {
                     @Override
                     public int compare(Movie lhs, Movie rhs) {
@@ -321,7 +327,7 @@ public class MainActivity extends AppCompatActivity
             startActivity(new Intent(MainActivity.this, Search.class));
 
         } else if (id == R.id.nav_manage) {
-
+            startActivity(new Intent(MainActivity.this,FavouriteActivity.class));
         } else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {

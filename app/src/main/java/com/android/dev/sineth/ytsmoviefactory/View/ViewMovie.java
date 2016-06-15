@@ -1,6 +1,5 @@
 package com.android.dev.sineth.ytsmoviefactory.View;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -24,6 +23,7 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.android.dev.sineth.ytsmoviefactory.Database.DBController;
 import com.android.dev.sineth.ytsmoviefactory.Database.DBHelper;
 import com.android.dev.sineth.ytsmoviefactory.Models.Movie;
 import com.android.dev.sineth.ytsmoviefactory.Models.Torrent;
@@ -121,34 +121,48 @@ public class ViewMovie extends AppCompatActivity implements View.OnClickListener
         ((TextView) findViewById(R.id.movie_genre_view_movie)).setText(getString(R.string.Genres) + movie.getMovie_genre());
         ((TextView) findViewById(R.id.downloads)).setText("Downloaded " + movie.getDownloads() + " times");
         ((TextView) findViewById(R.id.yt_url)).setText("https://www.youtube.com/watch?v=" + movie.getYouTubeurl());
-
-
-        Log.d("fav", String.valueOf(movie.getFavourite()));
-        if (movie.getFavourite()) {
+//        ContentValues values=new ContentValues();
+//        values.put(Keys.ISFAV,1);
+//        values.put(Keys.ID,0);
+//
+//        DBHelper dbHelper = new DBHelper(ViewMovie.this);
+//        sqLiteDatabase = dbHelper.getWritableDatabase();
+//        sqLiteDatabase.insert(DBHelper.FAVOURITE, null,values);
+        final Boolean aBoolean = DBController.getFavourite(ViewMovie.this, movie.getId());
+        if (aBoolean){
+            Toast.makeText(ViewMovie.this,"success",Toast.LENGTH_SHORT).show();
             fab.setImageResource(R.mipmap.ic_fav_added);
         }
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Boolean b = DBController.getFavourite(ViewMovie.this, movie.getId());
+                if(b){
+                    fab.setImageResource(R.mipmap.ic_fav);
+                    boolean b1 = DBController.removeFavourite(ViewMovie.this, movie.getId());
+                    boolean b2 = DBController.removeMovie(ViewMovie.this, ViewMovie.this.movie.getId());
+                    //Toast.makeText(view.getContext(),"Removed"+b1+" "+b2,Toast.LENGTH_SHORT).show();
+                    Snackbar.make(view, "Removed from Favourites", Snackbar.LENGTH_LONG).setAction("Undo", this).show();
 
-                DBHelper dbHelper = new DBHelper(ViewMovie.this);
-                sqLiteDatabase = dbHelper.getWritableDatabase();
-                ContentValues values = new ContentValues();
-                values.put(Keys.ID, movie.getId());
-                values.put(Keys.TITLE, movie.getMovie_title());
-                values.put(Keys.YEAR, movie.getMovie_released_year());
-                values.put(Keys.RATING, movie.getMovie_rating());
-                values.put(Keys.GENRES, movie.getMovie_genre());
-                values.put(Keys.SUMMARY, movie.getSummary());
-                values.put(Keys.LARGE_COVER_IMAGE, movie.getMovie_cover_url_large());
-                values.put(Keys.MEDIUM_COVER_IMAGE, movie.getMovie_cover_url_medium());
-                values.put(Keys.SMALL_COVER_IMAGE, movie.getMovie_cover_url_small());
-                values.put(Keys.YOUTUBE_TRAILER, movie.getYouTubeurl());
-                long rowCount = sqLiteDatabase.insert(DBHelper.MOVIE, null, values);
-                if (rowCount > 0) {
-                    Snackbar.make(view, "Successfully Added to Favourites", Snackbar.LENGTH_LONG).setAction("Undo", this).show();
-                    fab.setImageResource(R.mipmap.ic_fav_added);
-                    movie.setFavourite(true);
+                }else {
+                    boolean movieSuccess = DBController.insertMovie(ViewMovie.this, movie);
+                    boolean favourite = DBController.insertFavourite(ViewMovie.this, movie.getId());
+                    if (movieSuccess && favourite) {
+                        Snackbar.make(view, "Successfully Added to Favourites", Snackbar.LENGTH_LONG).setAction("Undo", this).show();
+                        fab.setImageResource(R.mipmap.ic_fav_added);
+                        // movie.setFavourite(true);
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                    }else {
+//                        Toast.makeText(view.getContext(),"FAILED "+favourite+" "+movieSuccess,Toast.LENGTH_SHORT).show();
+                        Snackbar.make(view, "Failed to remove from Favourites", Snackbar.LENGTH_LONG).show();
+
+                    }
+
                 }
             }
         });
@@ -156,7 +170,7 @@ public class ViewMovie extends AppCompatActivity implements View.OnClickListener
         requestQueue = VolleySingleton.getInstance().getRequestQueue();
         getAllDetails();
       //  getTorrent();
-        Toast.makeText(ViewMovie.this,torrentList.size()+"",Toast.LENGTH_SHORT).show();
+       // Toast.makeText(ViewMovie.this,torrentList.size()+"",Toast.LENGTH_SHORT).show();
     }
 
     private void showErrorDialog(String title,String content) {
